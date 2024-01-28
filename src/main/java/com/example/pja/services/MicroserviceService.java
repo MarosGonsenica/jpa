@@ -1,12 +1,14 @@
 package com.example.pja.services;
 
+import com.example.pja.controllers.data.Microservice;
 import com.example.pja.repositories.MicroserviceRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import com.example.pja.controllers.data.Microservice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,14 +18,13 @@ public class MicroserviceService {
 
     private final MicroserviceRepository microserviceRepository;
 
-    // inicializácia RestTemplate
     private final RestTemplate restTemplate = new RestTemplate();
 
     public MicroserviceService(MicroserviceRepository microserviceRepository) {
         this.microserviceRepository = microserviceRepository;
     }
 
-    public Microservice addPost(Microservice post) {
+    public Microservice createPost(Microservice post) {
         // validuje userId pomocou externého API
         final String validateUserUrl = "https://jsonplaceholder.typicode.com/users/" + post.getUserId();
         try {
@@ -31,8 +32,7 @@ public class MicroserviceService {
             // ak je userId platný, uloží príspevok
             return microserviceRepository.save(post);
         } catch (HttpClientErrorException.NotFound e) {
-            // exception neplatné userId
-            throw new RuntimeException("Invalid userId");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "userId not found with external API", e);
         }
     }
 
@@ -55,14 +55,23 @@ public class MicroserviceService {
                 return response.getBody();
             }
         } catch (HttpClientErrorException e) {
-            // Log chybu alebo ju spracujte podľa potreby
+            // log chyba
             System.out.println("External API did not find the post: " + e.getMessage());
         }
-        return null; // Vráti null, ak sa príspevok nenájde
+        return null; // null ak sa príspevok nenájde
     }
 
-    public Microservice savePost(Microservice post) {
-        // Uloží príspevok do databázy
+    public void deletePostById(Integer id) {
+        microserviceRepository.deleteById(id);
+    }
+
+    public Microservice updatePost(Integer id, String title, String body) {
+        Microservice post = microserviceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Post not found with id " + id));
+
+        post.setTitle(title);
+        post.setBody(body);
         return microserviceRepository.save(post);
     }
+
 }
