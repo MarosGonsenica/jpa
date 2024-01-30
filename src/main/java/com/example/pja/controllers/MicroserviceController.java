@@ -43,19 +43,7 @@ public class MicroserviceController {
 
     @GetMapping("/getPostById")
     public ResponseEntity<?> getPostById(@RequestParam Integer id) {
-        return microserviceService.getPostById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> {
-                    // ak sa príspevok nenájde, vyhľada pomocou externej API a uloži
-                    Microservice post = microserviceService.findPostByIdExternalAPI(id);
-                    if (post != null) {
-                        microserviceService.createPost(post); // ulozi príspevok do databázy
-                        return ResponseEntity.ok(post);
-                    } else {
-                        // ak sa príspevok nenájde ani pomocou externej API
-                        return ResponseEntity.notFound().build();
-                    }
-                });
+        return microserviceService.getOrCreatePostById(id);
     }
 
     @DeleteMapping("/deletePostById")
@@ -63,13 +51,13 @@ public class MicroserviceController {
         microserviceService.deletePostById(id);
     }
 
-    @PutMapping("/updatePost/{id}")
+    @PutMapping("/updatePostById/{id}")
     public ResponseEntity<?> updatePost(
+            //mozno este upravit aby neboli title a body vyzadovane
             @PathVariable Integer id,
-            @RequestParam String title,
-            @RequestParam String body) {
+            @RequestBody Microservice microservice) {
         try {
-            Microservice updatedPost = microserviceService.updatePost(id, title, body);
+            Microservice updatedPost = microserviceService.updatePost(id, microservice.getTitle(), microservice.getBody());
             return ResponseEntity.ok(updatedPost);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

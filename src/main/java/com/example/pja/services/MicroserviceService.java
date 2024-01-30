@@ -41,9 +41,20 @@ public class MicroserviceService {
         return microserviceRepository.findByUserId(userId);
     }
 
-    public Optional<Microservice> getPostById(Integer id) {
-        // Skúste najprv nájsť príspevok v lokálnej databáze
-        return microserviceRepository.findById(id);
+    public ResponseEntity<?> getOrCreatePostById(Integer id) {
+        Optional<Microservice> existingPost = microserviceRepository.findById(id);
+
+        if (existingPost.isPresent()) {
+            return ResponseEntity.ok(existingPost.get());
+        } else {
+            Microservice post = findPostByIdExternalAPI(id);
+            if (post != null) {
+                Microservice savedPost = createPost(post); // Uloží príspevok do databázy
+                return ResponseEntity.ok(savedPost);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }
     }
 
     public Microservice findPostByIdExternalAPI(Integer id) {

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Microservice Frontend</title>
+    <!-- Sem môžete pridať svoje CSS -->
+</head>
+<body>
+<h1>Microservice Management</h1>
+
+<!-- Vytvorenie príspevku -->
+<h2>Create Post</h2>
+<input type="text" id="createId" placeholder="ID">
+<input type="text" id="createUserId" placeholder="User ID">
+<input type="text" id="createTitle" placeholder="Title">
+<input type="text" id="createBody" placeholder="Body">
+<button onclick="createPost()">Create Post</button>
+
+<!-- Získanie príspevkov podľa User ID -->
+<h2>Get Posts By User ID</h2>
+<input type="number" id="userId" placeholder="User ID">
+<button onclick="getPostsByUserId()">Get Posts</button>
+
+<!-- Získanie príspevku podľa ID -->
+<h2>Get Post By ID</h2>
+<input type="number" id="postId" placeholder="Post ID">
+<button onclick="getPostById()">Get Post</button>
+
+<!-- Aktualizácia príspevku -->
+<h2>Update Post</h2>
+<input type="number" id="updateId" placeholder="ID">
+<input type="text" id="updateTitle" placeholder="New Title">
+<input type="text" id="updateBody" placeholder="New Body">
+<button onclick="updatePost()">Update Post</button>
+
+<!-- Mazanie príspevku -->
+<h2>Delete Post</h2>
+<input type="number" id="deletePostId" placeholder="Post ID">
+<button onclick="deletePost()">Delete Post</button>
+
+<!-- Odpovede a chyby -->
+<table id="responseTable">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>UserID</th>
+        <th>Title</th>
+        <th>Body</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Tu sa budú vkladať riadky -->
+    </tbody>
+</table>
+
+<!-- JavaScript -->
+<script src="site.js"></script>
+</body>
+</html>
