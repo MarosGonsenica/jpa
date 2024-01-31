@@ -12,3 +12,5 @@ username : idk , password : idc
 napisete 'SELECT * FROM MICROSERVICE' a date run co vam ukaze vsetky data v db (na zaciatku ziadne niesu, po znovuspusteni aplikacie sa db zresetuje)
 
 -Na 'http://localhost:8080/' sa nachadza jednoduchy FE alebo sa da aj cez swagger 'http://localhost:8080/swagger-ui/'
+
+-Aplikaciu som aj zdockerizoval a da sa spustit pomocou 'docker run -p 8080:8080 app' lenze bohuzial H2 databaza nefunguje cez remote connection 
