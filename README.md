@@ -1,5 +1,5 @@
 # pja
-Navod na spustenie : 
+Navod na spustenie :
 
 -Zapnete aplikaciu PjaApplication
 
