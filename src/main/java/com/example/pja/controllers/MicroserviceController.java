@@ -30,21 +30,35 @@ public class MicroserviceController {
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred: " + e.getMessage());
         }
     }
 
     @GetMapping("/getPostsByUserId")
-    public List<Microservice> getPostsByUserId(
-            @RequestParam Integer userId) {
-
-        return microserviceService.getPostsByUserId(userId);
+    public ResponseEntity<?> getPostsByUserId(@RequestParam Integer userId) {
+        try {
+            List<Microservice> posts = microserviceService.getPostsByUserId(userId);
+            if (posts.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No posts found for userId " +userId);
+            }
+            return ResponseEntity.ok(posts);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred: " + e.getMessage());
+        }
     }
 
     @GetMapping("/getPostById")
     public ResponseEntity<?> getPostById(@RequestParam Integer id) {
-        return microserviceService.getOrCreatePostById(id);
+        try {
+            Microservice post = microserviceService.getOrCreatePostById(id);
+            return ResponseEntity.ok(post);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred: " + e.getMessage());
+        }
     }
+
 
     @DeleteMapping("/deletePostById")
     public void deletePost(@RequestParam Integer id) {
@@ -53,7 +67,6 @@ public class MicroserviceController {
 
     @PutMapping("/updatePostById/{id}")
     public ResponseEntity<?> updatePost(
-            //mozno este upravit aby neboli title a body vyzadovane
             @PathVariable Integer id,
             @RequestBody Microservice microservice) {
         try {
@@ -64,6 +77,5 @@ public class MicroserviceController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred: " + e.getMessage());
         }
-        //alebo by sa dal zrobit nejaky global ExceptionHandler
     }
 }

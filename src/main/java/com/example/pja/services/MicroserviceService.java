@@ -3,6 +3,7 @@ package com.example.pja.services;
 import com.example.pja.controllers.data.Microservice;
 import com.example.pja.repositories.MicroserviceRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -41,18 +42,17 @@ public class MicroserviceService {
         return microserviceRepository.findByUserId(userId);
     }
 
-    public ResponseEntity<?> getOrCreatePostById(Integer id) {
+    public Microservice getOrCreatePostById(Integer id) {
         Optional<Microservice> existingPost = microserviceRepository.findById(id);
 
         if (existingPost.isPresent()) {
-            return ResponseEntity.ok(existingPost.get());
+            return existingPost.get();
         } else {
             Microservice post = findPostByIdExternalAPI(id);
             if (post != null) {
-                Microservice savedPost = createPost(post); // Uloží príspevok do databázy
-                return ResponseEntity.ok(savedPost);
+                return createPost(post);
             } else {
-                return ResponseEntity.notFound().build();
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with Id "+ id + " not found");
             }
         }
     }
@@ -65,20 +65,24 @@ public class MicroserviceService {
             if (response.getStatusCode() == HttpStatus.OK) {
                 return response.getBody();
             }
-        } catch (HttpClientErrorException e) {
-            // log chyba
-            System.out.println("External API did not find the post: " + e.getMessage());
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with Id "+ id + " not found with external API", e);
         }
-        return null; // null ak sa príspevok nenájde
+        return null;
     }
 
     public void deletePostById(Integer id) {
-        microserviceRepository.deleteById(id);
+        try {
+            microserviceRepository.deleteById(id);
+        }
+        catch (EmptyResultDataAccessException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with Id " + id + " not found", e);
+        }
     }
 
     public Microservice updatePost(Integer id, String title, String body) {
         Microservice post = microserviceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Post not found with id " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Post with Id "+ id + " not found"));
 
         post.setTitle(title);
         post.setBody(body);
